@@ -48,18 +48,14 @@ app.listen(port, () => {
 app.get('/users', (req, res) => {
     const name = req.query.name;
     const job = req.query.job;
-    console.log(name);
-    console.log(job);
+    //console.log(name);
+    //console.log(job);
     if (name != undefined){
-        console.log(name);
+        //console.log(name);
         let result = findUserByName(name);
         result = {users_list: result};
-        console.log("Name Filter:");
-        console.log(result);
 
         if(job != undefined){
-            console.log("Job Filter: ");
-            console.log(job);
             let jobResult = findUserByJob(job);
             result = {user: jobResult};
             res.send(result);
@@ -67,6 +63,7 @@ app.get('/users', (req, res) => {
         else{
             res.send(result);
         }
+        
     }
     else{
         res.send(users);
@@ -91,31 +88,7 @@ app.get('/users/:id', (req, res) => {
         res.send(result);
     }
 });
-// app.get('/users/:job', (req, res) => {
-//     const name = req.query.name;
-//     const job =req.params['job'];
-//     console.log(name);
-//     console.log(job);
-//     if (name != undefined){
-//         console.log(name);
-//         let result = findUserByName(name);
-//         result = {users_list: result};
-//         console.log(result);
 
-//         if(job != undefined){
-//             console.log(job);
-//             let jobResult = findUserByJob(job);
-//             result = {result: job};
-//             res.send(result);
-//         }
-//         else{
-//             res.send(result);
-//         }
-//     }
-//     else{
-//         res.send(users);
-//     }
-// });
 
 function findUserById(id) {
     return users['users_list'].find( (user) => user['id'] === id); // or line below
@@ -124,8 +97,10 @@ function findUserById(id) {
 
 app.post('/users', (req, res) => {
     const userToAdd = req.body;
+    id = generateID();
+    userToAdd.id = id;
     addUser(userToAdd);
-    res.status(201).end();
+    res.status(200).end();
 });
 
 function addUser(user){
@@ -133,11 +108,18 @@ function addUser(user){
 }
 
 
-app.delete('/users', (req, res) => {
-    const deleteID = req.body.id;
+app.delete('/users/:id', (req, res) => {
+    const deleteID = req.params['id'];
     //console.log(deleteID);
-    deleteUser(deleteID);
-    res.status(200).end();
+    id = findUserById(deleteID);
+    //console.log(id);
+    if (id != null){
+        deleteUser(deleteID);
+        res.status(204).end();
+    }
+    else{
+        res.status(404).end();
+    }
 });
 
 
@@ -153,4 +135,8 @@ function deleteUser(userID){
     else{
         users['users_list'].splice(index,1);
     }
+}
+
+function generateID(){
+    return Math.random().toString(16).slice(2)
 }
